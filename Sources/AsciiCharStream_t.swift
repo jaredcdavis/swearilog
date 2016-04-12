@@ -1,5 +1,6 @@
 func testAsciiChar()
 {
+    print("Testing ASCII character conversion... ", terminator:"");
     assert(AsciiCharFromCharacter("A") == 65)
     assert(CharacterFromAsciiChar(65) == "A")
 
@@ -16,13 +17,13 @@ func testAsciiChar()
         let char = Character(UnicodeScalar(i));
         assert(AsciiCharFromCharacter(char) == nil);
     }
+    print("ok.");
 }
 
 
 func testHelloWorld(stream : AsciiCharStream)
 {
-    print("Testing Hello World stream... ", terminator:"");
-
+    print("Testing Hello World stream \(stream)... ", terminator:"");
     func at(line : UInt, col : UInt, char : UInt) -> Void {
         assert(stream.getLineNumber() == line);
         assert(stream.getColNumber() == col);
@@ -34,6 +35,10 @@ func testHelloWorld(stream : AsciiCharStream)
         assert(actual == AsciiCharFromCharacter(expect));
         at(line, col: col, char: char);
     }
+
+    // This should fail because we're at the start of the stream.
+    let oops : Void? = try? stream.ungetChar();
+    assert(oops == nil);
 
     at(1, col: 0, char: 0);
 
@@ -79,8 +84,11 @@ func testHelloWorld(stream : AsciiCharStream)
     read("d", line: 2, col: 5, char: 11);
     let end = stream.getChar();
     assert(end == nil);
+    at(2, col: 5, char: 11);
+
     let end2 = stream.getChar();
     assert(end2 == nil);
+    at(2, col: 5, char: 11);
 
     print("ok.")
     return;
@@ -92,4 +100,7 @@ func testAsciiCharStream() throws -> Void
 
     let stream = AsciiStringReader(str: "Hello\nWorld");
     testHelloWorld(stream);
+
+    let fstream = try! AsciiFileReader(path: "Sources/AsciiCharStream_t.txt");
+    testHelloWorld(fstream);
 }
